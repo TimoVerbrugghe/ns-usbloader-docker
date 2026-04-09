@@ -9,6 +9,9 @@ ENV LANG=C.UTF-8
 ENV DISPLAY=:0
 ENV APP_USER=nsusbloader
 ENV APP_HOME=/home/nsusbloader
+ENV HOME=/tmp
+ENV XDG_CACHE_HOME=/tmp/.cache
+ENV JAVA_TOOL_OPTIONS=-Duser.home=/tmp -Djava.util.prefs.userRoot=/tmp/.java/.userPrefs
 
 VOLUME /nsp
 VOLUME $APP_HOME/.java/.userPrefs/NS-USBloader
@@ -18,6 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates wget \
     libx11-6 libxxf86vm1 libgl1 \
     xvfb x11vnc openbox \
+    python3-xdg \
     supervisor \
     novnc websockify \
     openjdk-17-jdk \
@@ -45,4 +49,4 @@ EXPOSE 6042
 
 USER $APP_USER
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/bin/sh", "-lc", "mkdir -p /tmp/.cache/fontconfig /tmp/.openjfx/cache /tmp/.java/.userPrefs/NS-USBloader && [ -f /tmp/.java/.userPrefs/NS-USBloader/prefs.xml ] || cp -f $APP_HOME/.java/.userPrefs/NS-USBloader/prefs.xml /tmp/.java/.userPrefs/NS-USBloader/prefs.xml && exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]
