@@ -1,51 +1,45 @@
-# Use an official OpenJDK image with Debian
-FROM ubuntu:22.04
+FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL=C.UTF-8
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US.UTF-8
+ENV LANG=C.UTF-8
 ENV DISPLAY=:0
+ENV APP_USER=nsusbloader
+ENV APP_HOME=/home/nsusbloader
 
 VOLUME /nsp
-VOLUME /root/.java/.userPrefs/NS-USBloader
+VOLUME $APP_HOME/.java/.userPrefs/NS-USBloader
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    wget tar \
-    libx11-6 libxxf86vm1 libgl1-mesa-glx \
+# Install dependencies and prepare runtime paths
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates wget \
+    libx11-6 libxxf86vm1 libgl1 \
     xvfb x11vnc openbox \
     supervisor \
     novnc websockify \
-    openjdk-11-jdk \
-    # OpenJFX is absolutely necessary because openjdx in docker apparently does not install JavaFX components
-    openjfx
+    openjdk-17-jdk \
+    openjfx \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system $APP_USER \
+    && useradd --system --create-home --home-dir $APP_HOME --gid $APP_USER $APP_USER \
+    && mkdir -p $APP_HOME/.config/openbox $APP_HOME/.java/.userPrefs/NS-USBloader /usr/local/app /nsp /tmp/.X11-unix \
+    && chmod 1777 /tmp/.X11-unix \
+    && wget -q https://github.com/developersu/ns-usbloader/releases/download/v7.3/ns-usbloader-7.3.jar -O /usr/local/app/ns-usbloader.jar \
+    && chown -R $APP_USER:$APP_USER $APP_HOME /usr/local/app /nsp
 
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY rc.xml $APP_HOME/.config/openbox/rc.xml
+COPY prefs.xml $APP_HOME/.java/.userPrefs/NS-USBloader/prefs.xml
 
-# Install ns-usbloader
-RUN wget https://github.com/developersu/ns-usbloader/releases/download/v7.3/ns-usbloader-7.3.jar && \
-    chmod +x ns-usbloader-7.3.jar && \
-    mkdir /usr/local/app && \
-    mv ns-usbloader-7.3.jar /usr/local/app/ns-usbloader.jar
+# Ensure copied config files are owned by non-root runtime user
+RUN chown -R $APP_USER:$APP_USER $APP_HOME \
+    && ln -sfn /usr/share/novnc/vnc.html /usr/share/novnc/index.html
 
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Add the Openbox config file for maximizing windows
-ADD rc.xml /root/.config/openbox/rc.xml
-
-# Add preformatted preferences file for NS-USBLoader
-ADD prefs.xml /root/.java/.userPrefs/NS-USBloader/prefs.xml
-
-# Create a symbolic link between /usr/share/novnc/vnc.html and index.html
-RUN ln -s /usr/share/novnc/vnc.html /usr/share/novnc/index.html
-
-# Set the working directory
 WORKDIR /usr/local/app/
 
-# Expose port 8080 for noVNC and 6042 for NS-USBLoader file transfers
 EXPOSE 8080
 EXPOSE 6042
 
-# Start Xvfb, Fluxbox, x11vnc & novnc server, and run the Java application
+USER $APP_USER
+
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

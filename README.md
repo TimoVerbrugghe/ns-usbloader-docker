@@ -30,7 +30,7 @@ Before running the Docker container, make sure you have the following installed:
 3. Run the Docker container:
 
     ```shell
-    docker run -d -p 8080:8080 -p 6042:6042 -v /path/to/nsp/files:/nsp -v /path/to/config:/root/.java/.userPrefs/NS-USBloader ghcr.io/timoverbrugghe/ns-usbloader
+    docker run -d --platform linux/amd64 -p 8080:8080 -p 6042:6042 -v /path/to/nsp/files:/nsp -v /path/to/config:/home/nsusbloader/.java/.userPrefs/NS-USBloader ghcr.io/timoverbrugghe/ns-usbloader
     ```
 
 4. Access ns-usbloader in your web browser:
@@ -41,27 +41,28 @@ Before running the Docker container, make sure you have the following installed:
 
 ## Docker Compose
 
-Here's an example Docker Compose configuration to run ns-usbloader:
+The repository includes a default Compose file at `docker-compose.yaml` in the project root.
 
-```yaml
-services:
-  ns-usbloader:
-    image: ghcr.io/timoverbrugghe/ns-usbloader
-    ports:
-      - 8080:8080
-      - 6042:6042
-    volumes:
-      - /path/to/nsp/files:/nsp
-      - /path/to/config:/root/.java/.userPrefs/NS-USBloader
-```
-
-Save the above configuration in a file named `docker-compose.yaml`, and then run the following command to start the container:
+The Compose file uses the latest public release image from GitHub Container Registry and named Docker volumes for NSP data and preferences. Run the following command to start the container:
 
 ```shell
 docker-compose up -d
 ```
 
 You can access ns-usbloader in your web browser at `http://localhost:8080`.
+
+On Apple Silicon (ARM64), the compose file explicitly uses `platform: linux/amd64` to avoid JavaFX native library compatibility issues in ns-usbloader.
+
+## Optional runtime hardening
+
+The default `docker-compose.yaml` already includes these runtime hardening settings:
+
+```shell
+cap_drop:
+  - ALL
+security_opt:
+  - no-new-privileges:true
+```
 
 ## Configure ns-usbloader
 

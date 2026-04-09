@@ -1,0 +1,18 @@
+services:
+  ns-usbloader:
+    image: ghcr.io/timoverbrugghe/ns-usbloader
+    platform: linux/amd64
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 8080:8080
+      - 6042:6042
+    volumes:
+      - nsusbloader-nsp:/nsp
+      - nsusbloader-config:/home/nsusbloader/.java/.userPrefs/NS-USBloader
+
+volumes:
+  nsusbloader-nsp:
+  nsusbloader-config:
