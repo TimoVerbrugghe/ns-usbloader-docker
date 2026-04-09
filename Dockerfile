@@ -1,5 +1,8 @@
 FROM debian:bookworm-slim
 
+ARG UID=1000
+ARG GID=1000
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
@@ -20,8 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jdk \
     openjfx \
     && rm -rf /var/lib/apt/lists/* \
-    && groupadd --system $APP_USER \
-    && useradd --system --create-home --home-dir $APP_HOME --gid $APP_USER $APP_USER \
+    && groupadd --system --gid $GID $APP_USER \
+    && useradd --system --create-home --home-dir $APP_HOME --gid $GID --uid $UID $APP_USER \
     && mkdir -p $APP_HOME/.config/openbox $APP_HOME/.java/.userPrefs/NS-USBloader /usr/local/app /nsp /tmp/.X11-unix \
     && chmod 1777 /tmp/.X11-unix \
     && wget -q https://github.com/developersu/ns-usbloader/releases/download/v7.3/ns-usbloader-7.3.jar -O /usr/local/app/ns-usbloader.jar \

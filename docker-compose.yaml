@@ -2,6 +2,8 @@ services:
   ns-usbloader:
     image: ghcr.io/timoverbrugghe/ns-usbloader
     platform: linux/amd64
+    # Optional: uncomment and set to match your host user
+    # user: "${UID:-1000}:${GID:-1000}"
     cap_drop:
       - ALL
     security_opt:
