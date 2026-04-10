@@ -77,3 +77,74 @@ Before installing games using ns-usbloader, you need to configure the port and I
 4. Save the settings.
 
 Now you can proceed with installing games using ns-usbloader.
+
+## USB Device Support
+
+To use ns-usbloader container with Nintendo Switch USB connectivity (normal mode or RCM), you need to configure udev rules on your **host system** (not in the container).
+
+### Setting up udev rules
+
+Run these commands **once on your machine** (or on each Kubernetes node for cluster deployment):
+
+```bash
+# Nintendo Switch normal mode (Goldleaf)
+sudo tee /etc/udev/rules.d/99-NS.rules > /dev/null <<EOF
+SUBSYSTEM=="usb", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="3000", MODE="0666"
+EOF
+
+# RCM/Recovery mode (payload injection)
+sudo tee /etc/udev/rules.d/99-NS-RCM.rules > /dev/null <<EOF
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0955", ATTRS{idProduct}=="7321", MODE="0666"
+EOF
+
+# Reload and apply rules
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+### Running with USB support
+
+After applying the udev rules, run the container with USB bus access:
+
+**Docker:**
+```bash
+docker run -it --rm -p 8080:8080 -p 6042:6042 \
+  -v /path/to/nsp/files:/nsp \
+  --device /dev/bus/usb \
+  ghcr.io/timoverbrugghe/ns-usbloader
+```
+
+**Docker Compose:**
+Update `docker-compose.yaml` to include USB device access:
+```yaml
+services:
+  ns-usbloader:
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+```
+
+**Podman:**
+```bash
+podman run -it --rm -p 8080:8080 -p 6042:6042 \
+  -v /path/to/nsp/files:/nsp \
+  --device /dev/bus/usb \
+  ghcr.io/timoverbrugghe/ns-usbloader
+```
+
+**Kubernetes:**
+Update your Deployment manifest to mount the USB bus:
+```yaml
+containers:
+  - name: ns-usbloader
+    volumeMounts:
+      - name: usb-bus
+        mountPath: /dev/bus/usb
+volumes:
+  - name: usb-bus
+    hostPath:
+      path: /dev/bus/usb
+      type: Directory
+```
+
+### Note
+
+The container runs as a non-root user (UID 3000) for security. The udev rules with `MODE="0666"` allow the container process to access USB devices without requiring root privilege elevation.

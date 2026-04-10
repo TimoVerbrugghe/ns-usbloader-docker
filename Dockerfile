@@ -34,11 +34,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && wget -q https://github.com/developersu/ns-usbloader/releases/download/v7.3/ns-usbloader-7.3.jar -O /usr/local/app/ns-usbloader.jar \
     && chown -R $APP_USER:$APP_USER $APP_HOME /usr/local/app /nsp
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY rc.xml $APP_HOME/.config/openbox/rc.xml
-COPY prefs.xml $APP_HOME/.java/.userPrefs/NS-USBloader/prefs.xml
-COPY 99-NS.rules /etc/udev/rules.d/99-NS.rules
-COPY 99-NS-RCM.rules /etc/udev/rules.d/99-NS-RCM.rules
+COPY app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY app/rc.xml $APP_HOME/.config/openbox/rc.xml
+COPY app/prefs.xml $APP_HOME/.java/.userPrefs/NS-USBloader/prefs.xml
 
 # Ensure copied config files are owned by non-root runtime user
 RUN chown -R $APP_USER:$APP_USER $APP_HOME \
