@@ -106,6 +106,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 After applying the udev rules, run the container with USB bus access:
 
 **Docker:**
+
 ```bash
 docker run -it --rm -p 8080:8080 -p 6042:6042 \
   -v /path/to/nsp/files:/nsp \
@@ -115,6 +116,7 @@ docker run -it --rm -p 8080:8080 -p 6042:6042 \
 
 **Docker Compose:**
 Update `docker-compose.yaml` to include USB device access:
+
 ```yaml
 services:
   ns-usbloader:
@@ -123,6 +125,7 @@ services:
 ```
 
 **Podman:**
+
 ```bash
 podman run -it --rm -p 8080:8080 -p 6042:6042 \
   -v /path/to/nsp/files:/nsp \
@@ -132,6 +135,7 @@ podman run -it --rm -p 8080:8080 -p 6042:6042 \
 
 **Kubernetes:**
 Update your Deployment manifest to mount the USB bus:
+
 ```yaml
 containers:
   - name: ns-usbloader
