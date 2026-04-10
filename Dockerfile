@@ -9,9 +9,9 @@ ENV LANG=C.UTF-8
 ENV DISPLAY=:0
 ENV APP_USER=nsusbloader
 ENV APP_HOME=/home/nsusbloader
-ENV HOME=/tmp
-ENV XDG_CACHE_HOME=/tmp/.cache
-ENV JAVA_TOOL_OPTIONS=-Duser.home=/tmp -Djava.util.prefs.userRoot=/tmp/.java/.userPrefs
+ENV HOME=$APP_HOME
+ENV XDG_CACHE_HOME=$APP_HOME/.cache
+ENV JAVA_TOOL_OPTIONS="-Duser.home=$APP_HOME -Djava.util.prefs.userRoot=$APP_HOME/.java/.userPrefs"
 
 VOLUME /nsp
 VOLUME $APP_HOME/.java/.userPrefs/NS-USBloader
@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --system --gid $GID $APP_USER \
     && useradd --system --create-home --home-dir $APP_HOME --gid $GID --uid $UID $APP_USER \
-    && mkdir -p $APP_HOME/.config/openbox $APP_HOME/.java/.userPrefs/NS-USBloader /usr/local/app /nsp /tmp/.X11-unix \
+    && mkdir -p $APP_HOME/.cache/fontconfig $APP_HOME/.openjfx/cache $APP_HOME/.config/openbox $APP_HOME/.java/.userPrefs/NS-USBloader /usr/local/app /nsp /tmp/.X11-unix \
     && chmod 1777 /tmp/.X11-unix \
     && wget -q https://github.com/developersu/ns-usbloader/releases/download/v7.3/ns-usbloader-7.3.jar -O /usr/local/app/ns-usbloader.jar \
     && chown -R $APP_USER:$APP_USER $APP_HOME /usr/local/app /nsp
@@ -40,6 +40,7 @@ COPY prefs.xml $APP_HOME/.java/.userPrefs/NS-USBloader/prefs.xml
 
 # Ensure copied config files are owned by non-root runtime user
 RUN chown -R $APP_USER:$APP_USER $APP_HOME \
+    && chmod -R a+rwX $APP_HOME \
     && ln -sfn /usr/share/novnc/vnc.html /usr/share/novnc/index.html
 
 WORKDIR /usr/local/app/
@@ -49,4 +50,4 @@ EXPOSE 6042
 
 USER $APP_USER
 
-CMD ["/bin/sh", "-lc", "mkdir -p /tmp/.cache/fontconfig /tmp/.openjfx/cache /tmp/.java/.userPrefs/NS-USBloader && [ -f /tmp/.java/.userPrefs/NS-USBloader/prefs.xml ] || cp -f $APP_HOME/.java/.userPrefs/NS-USBloader/prefs.xml /tmp/.java/.userPrefs/NS-USBloader/prefs.xml && exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
