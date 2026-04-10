@@ -37,6 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY rc.xml $APP_HOME/.config/openbox/rc.xml
 COPY prefs.xml $APP_HOME/.java/.userPrefs/NS-USBloader/prefs.xml
+COPY 99-NS.rules /etc/udev/rules.d/99-NS.rules
+COPY 99-NS-RCM.rules /etc/udev/rules.d/99-NS-RCM.rules
 
 # Ensure copied config files are owned by non-root runtime user
 RUN chown -R $APP_USER:$APP_USER $APP_HOME \

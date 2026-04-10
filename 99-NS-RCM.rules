@@ -1,0 +1,3 @@
+# NS-USBloader udev rules for Nintendo Switch RCM (Recovery Mode) access
+# Vendor: NVIDIA (bootloader), Device: Switch in RCM mode
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0955", ATTRS{idProduct}=="7321", MODE="0666"

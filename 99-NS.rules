@@ -1,0 +1,3 @@
+# NS-USBloader udev rules for Nintendo Switch USB access (normal mode)
+# Vendor: Nintendo, Device: Switch in normal mode
+SUBSYSTEM=="usb", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="3000", MODE="0666"
