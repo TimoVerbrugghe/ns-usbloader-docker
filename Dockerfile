@@ -11,7 +11,7 @@ ENV APP_USER=nsusbloader
 ENV APP_HOME=/home/nsusbloader
 ENV HOME=$APP_HOME
 ENV XDG_CACHE_HOME=$APP_HOME/.cache
-ENV JAVA_TOOL_OPTIONS="-Duser.home=$APP_HOME -Djava.util.prefs.userRoot=$APP_HOME/.java/.userPrefs"
+ENV JAVA_TOOL_OPTIONS="-Duser.home=$APP_HOME -Djava.util.prefs.userRoot=$APP_HOME"
 
 VOLUME /nsp
 VOLUME $APP_HOME/.java/.userPrefs/NS-USBloader
